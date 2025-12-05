@@ -7600,8 +7600,8 @@ In general, make sure this notebook represents a complete project: Write an expl
 <span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">r2_score</span><span class="p">,</span> <span class="n">mean_squared_error</span><span class="p">,</span> <span class="n">mean_absolute_error</span>
 <span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">OneHotEncoder</span>
 <span class="kn">from</span> <span class="nn">sklearn.compose</span> <span class="kn">import</span> <span class="n">ColumnTransformer</span>
-<span class="kn">from</span> <span class="nn">sklearn.pipeline</span> <span class="kn">import</span> <span class="n">Pipeline</span>
 <span class="kn">import</span> <span class="nn">statsmodels.api</span> <span class="k">as</span> <span class="nn">sm</span>
+<span class="kn">from</span> <span class="nn">statsmodels.stats.outliers_influence</span> <span class="kn">import</span> <span class="n">variance_inflation_factor</span>
 </pre></div>
 </div>
 </div>
@@ -8076,6 +8076,153 @@ No highly correlated pairs found, so no features need removal
 </div>
 </div>
 </div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=2778b4bc">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="VIF-CHECK">VIF CHECK<a class="anchor-link" href="#VIF-CHECK">¶</a></h2><p>While the correlation matrix shows pairwise relationships between features, VIF measures how much 
+a feature is explained by ALL other features combined. This catches multicollinearity that 
+pairwise correlations might miss.</p>
+<p><strong>HVIF ITERPRETATION</strong></p>
+<ul>
+<li>VIF = 1: No correlation with other features</li>
+<li>VIF &lt; 5: Low multicollinearity (acceptable)</li>
+<li>VIF 5-10: Moderate multicollinearity (usually acceptable)</li>
+<li>VIF &gt; 10: High multicollinearity (consider removing the feature)</li>
+</ul>
+<p>I'll calculate VIF for all predictor features (excluding danceability since that's my target variable).</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=436ae5d1">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [11]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">feature_cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">numeric_cols</span> <span class="k">if</span> <span class="n">col</span> <span class="o">!=</span> <span class="s1">'danceability'</span><span class="p">]</span>
+<span class="n">vif_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+<span class="n">vif_data</span><span class="p">[</span><span class="s1">'Feature'</span><span class="p">]</span> <span class="o">=</span> <span class="n">feature_cols</span>
+<span class="n">vif_data</span><span class="p">[</span><span class="s1">'VIF'</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">variance_inflation_factor</span><span class="p">(</span><span class="n">df_clean</span><span class="p">[</span><span class="n">feature_cols</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span> 
+                   <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">feature_cols</span><span class="p">))]</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Variance Inflation Factor (VIF) for features:"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">vif_data</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>
+Variance Inflation Factor (VIF) for features:
+             Feature        VIF
+0         popularity   5.271377
+1        duration_ms   5.253576
+2             energy  23.352300
+3                key   3.238587
+4           loudness   9.299417
+5               mode   2.790109
+6        speechiness   1.775577
+7       acousticness   3.933332
+8   instrumentalness   1.952122
+9           liveness   2.551434
+10           valence   5.111085
+11             tempo  17.543777
+12    time_signature  45.991925
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=9732dad3">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>I notice an extremely high VIF for time_signature so I will remove it and will see how the results change...</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=ec642498">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [12]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Remove time_signature from features</span>
+<span class="n">feature_cols_v2</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">feature_cols</span> <span class="k">if</span> <span class="n">col</span> <span class="o">!=</span> <span class="s1">'time_signature'</span><span class="p">]</span>
+
+<span class="c1"># Recalculate VIF</span>
+<span class="n">vif_data_v2</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+<span class="n">vif_data_v2</span><span class="p">[</span><span class="s1">'Feature'</span><span class="p">]</span> <span class="o">=</span> <span class="n">feature_cols_v2</span>
+<span class="n">vif_data_v2</span><span class="p">[</span><span class="s1">'VIF'</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">variance_inflation_factor</span><span class="p">(</span><span class="n">df_clean</span><span class="p">[</span><span class="n">feature_cols_v2</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span> 
+                      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">feature_cols_v2</span><span class="p">))]</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">vif_data_v2</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s1">'VIF'</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>             Feature        VIF
+2             energy  16.324733
+11             tempo  15.898210
+4           loudness   7.549559
+1        duration_ms   5.072389
+10           valence   4.979447
+0         popularity   4.903501
+7       acousticness   3.681807
+3                key   3.186427
+5               mode   2.753701
+9           liveness   2.545928
+8   instrumentalness   1.947628
+6        speechiness   1.774484
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=f9a3540a">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p><strong>Interpretation:</strong>
+VIF analysis after removing time_signature shows energy (16.3) and tempo (15.9) still exceed 
+the threshold of 10, indicating some multicollinearity. However:</p>
+<ol>
+<li>for linreg: coefficient estimates for energy and tempo should be interpreted 
+with caution due to potential instability</li>
+<li>for rf (as I went back and forth with this notebook I know rf performs extremely well and it will be my final model): multicollinearity is not a concern since rf doesn't estimate coefficients 
+and handles correlated features naturally</li>
+</ol>
+<p>Since my final model is Random Forest, I retain all features to maximize its predictive performance. BUT I understand the implications of high VIFs for linreg analysis</p>
+</div>
+</div>
+</div>
+</div>
 <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=fcf84066">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
@@ -8096,7 +8243,7 @@ No highly correlated pairs found, so no features need removal
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [11]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [13]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># define X (features) and y (target)</span>
@@ -8148,7 +8295,7 @@ Test:       12036 samples
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [12]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [14]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># identify column types</span>
@@ -8203,7 +8350,7 @@ After one-hot encoding: 127
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [13]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [15]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># create and train model</span>
@@ -8259,7 +8406,7 @@ After one-hot encoding: 127
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [14]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [16]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># convert sparse matrix to dense array for statsmodels</span>
@@ -8344,7 +8491,7 @@ Note: p-value &lt; 0.05 = statistically significant
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [15]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [17]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># calculate residuals</span>
@@ -8458,7 +8605,7 @@ Note: p-value &lt; 0.05 = statistically significant
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [16]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [18]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># create and train model</span>
@@ -8523,7 +8670,7 @@ Note: p-value &lt; 0.05 = statistically significant
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <p><strong>MMETRICS HELPER</strong></p>
 <ul>
-<li><p><strong>MAE</strong> Average error in popularity points. Lower = better.</p>
+<li><p><strong>MAE</strong> Average error in danceability points. Lower = better.</p>
 </li>
 <li><p><strong>RMSE</strong> Like MAE but penalises big errors more. Lower = better.</p>
 </li>
@@ -8538,7 +8685,7 @@ Note: p-value &lt; 0.05 = statistically significant
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [17]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [19]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># comparison table</span>
@@ -8598,7 +8745,7 @@ Linear Regression 0.135107 0.166303 0.084176
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [18]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [20]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># predict on test set (first time using it!)</span>
@@ -8678,7 +8825,7 @@ Linear Regression 0.135107 0.166303 0.084176
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [19]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [21]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># bootstrap for confidence interval</span>
@@ -8729,7 +8876,7 @@ Linear Regression 0.135107 0.166303 0.084176
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [20]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [22]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># visualise bootstrap distribution</span>
@@ -8781,8 +8928,8 @@ Linear Regression 0.135107 0.166303 0.084176
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h2 id="CONCLUSION">CONCLUSION<a class="anchor-link" href="#CONCLUSION">¶</a></h2><p><strong>KEY FINDINGD</strong></p>
-<p>No multicollinearity issues - no feature pairs exceeded the 0.85 correlation threshold, so all features were kept
-linreg performed poorly <strong>(R^2 = 8.4%)</strong> - danceability is NOT well explained by simple linear relationships</p>
+<p>Some multicollinearity issues with linreg - VIF analysis revealed some multicollinearity in energy and tempo, but since Random Forest handles this naturally, all features were retained &amp; also no feature pairs exceeded the 0.85 correlation threshold, so all features were kept</p>
+<p>linreg performed poorly <strong>(R^2 = 8.4%)</strong> - danceability is NOT well explained by simple linear relationships</p>
 <p>Rrf on the other hand significantly outperformed linreg <strong>(R^2 = 65%)</strong> - capturing non-linear patterns in the data</p>
 <p>Generalisation error is stable - <strong>bootstrap 95% CI of [0.101, 0.104]</strong> shows consistent, reliable predictions</p>
 <p>Most features are statistically significant - <strong>only key &amp; instrumentalness had p-values &gt; 0.05</strong></p>
